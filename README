@@ -1,0 +1,4 @@
+email saver README
+==================
+
+This PHP script saves html text, headers and attachments of emails on a local disk.
