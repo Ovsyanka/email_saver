@@ -1,11 +1,11 @@
 <?php
-// Main ReciveMail Class File - Version 1.1 (02-06-2009)
+// Main ReciveMail Class File - Version 1.2b (02-12-2011)
 /*
  * File: recivemail.class.php
  * Description: Reciving mail With Attechment
- * Version: 1.1
+ * Version: 1.2b
  * Created: 01-03-2006
- * Modified: 02-06-2009
+ * Modified: 02-12-2011 by OR
  * Author: Mitul Koradia
  * Email: mitulkoradia@gmail.com
  * Cell : +91 9825273322
@@ -50,9 +50,6 @@ class receiveMail
 		//echo("{$this->server},{$this->username},{$this->password}");
 		//$this->server = "{pop.mail.ru:110/pop3}";
 		$this->marubox=imap_open($this->server,$this->username,$this->password);
-		// {imap.yandex.ru:993/ssl}INBOX,Oboltus45@yandex.ru,bugaga
-		//$this->marubox = imap_open("{imap.yandex.ru:993/imap/ssl}INBOX", "Oboltus45@yandex.ru", "bugaga");
-		//$this->marubox = imap_open("{imap.gmail.com:993/imap/ssl}INBOX", "igor.deyashkin@gmail.com", "zeleboba");
 		//var_dump($this->marubox);
 		//echo('ololo');
 		if(!$this->marubox)
@@ -84,12 +81,16 @@ class receiveMail
 				);
 		}
 		//----------
-		//Костыль для преобразовывания заголовка письма в удобочитаемый вид. Я не разобрался до конца что к чему, просто сделал чтоб работало.
-		//Он (иногда? похоже, что в imap всегда?...) приходит в виде ?UTF-8?B?0J/QvtGB0LvQtdC00L3QuNC1INC9?==?UTF-8?B?0L7QstC+0YHRgtC4INC4INGB0L7QsQ==?==?UTF-8?B?0YvRgtC40Y8g0YTQvtGA0YPQvNCwIE0=?==?UTF-8?B?TUdQICjRgdC10L3RgtGP0LHRgNGMKQ==?=
-		//И вот для этого случая этот кусок кода.
+		//РљРѕСЃС‚С‹Р»СЊ РґР»СЏ РїСЂРµРѕР±СЂР°Р·РѕРІС‹РІР°РЅРёСЏ Р·Р°РіРѕР»РѕРІРєР° РїРёСЃСЊРјР° РІ СѓРґРѕР±РѕС‡РёС‚Р°РµРјС‹Р№ РІРёРґ. РЇ РЅРµ СЂР°Р·РѕР±СЂР°Р»СЃСЏ РґРѕ РєРѕРЅС†Р° С‡С‚Рѕ Рє С‡РµРјСѓ, РїСЂРѕСЃС‚Рѕ СЃРґРµР»Р°Р» С‡С‚РѕР± СЂР°Р±РѕС‚Р°Р»Рѕ.
+		//РћРЅ (РёРЅРѕРіРґР°? РїРѕС…РѕР¶Рµ, С‡С‚Рѕ РІ imap РІСЃРµРіРґР°?...) РїСЂРёС…РѕРґРёС‚ РІ РІРёРґРµ ?UTF-8?B?0J/QvtGB0LvQtdC00L3QuNC1INC9?==?UTF-8?B?0L7QstC+0YHRgtC4INC4INGB0L7QsQ==?==?UTF-8?B?0YvRgtC40Y8g0YTQvtGA0YPQvNCwIE0=?==?UTF-8?B?TUdQICjRgdC10L3RgtGP0LHRgNGMKQ==?=
+		//Р РІРѕС‚ РґР»СЏ СЌС‚РѕРіРѕ СЃР»СѓС‡Р°СЏ СЌС‚РѕС‚ РєСѓСЃРѕРє РєРѕРґР°.
 		//$mail_header_txt = imap_fetchheader($this->marubox,$mid);
 		$h = imap_mime_header_decode($mail_details['subject']);
+		// echo("<br />");
+		// var_dump($h);
+		// echo("<br />");
 		foreach ($h as $el) {
+			if ($el->charset == 'default') $el->charset = 'cp1251';
 			$mail_details['subjectD'] .= mb_convert_encoding($el->text, "UTF-8", $el->charset);
 		}
 		//----------
@@ -127,8 +128,8 @@ class receiveMail
 				} 
 				else
 				{ 
-				//Если исходная кодировка другая - может все испортить.
-				//нужно раньше определять как-то (в теме кодировка или еще где...)
+				//Р•СЃР»Рё РёСЃС…РѕРґРЅР°СЏ РєРѕРґРёСЂРѕРІРєР° РґСЂСѓРіР°СЏ - РјРѕР¶РµС‚ РІСЃРµ РёСЃРїРѕСЂС‚РёС‚СЊ.
+				//РЅСѓР¶РЅРѕ СЂР°РЅСЊС€Рµ РѕРїСЂРµРґРµР»СЏС‚СЊ РєР°Рє-С‚Рѕ (РІ С‚РµРјРµ РєРѕРґРёСЂРѕРІРєР° РёР»Рё РµС‰Рµ РіРґРµ...)
 					return $text;
 					//return mb_convert_encoding($text, "UTF-8", "cp1251"); 
 				} 
@@ -156,8 +157,8 @@ class receiveMail
 		if(!$this->marubox)
 			return false;
 		$imap_obj=imap_check($this->marubox);
-		echo("<br />Recent = {$imap_obj->Recent}");
-		echo("<br />Nmsgs = {$imap_obj->Nmsgs}");
+		//echo("<br />Recent = {$imap_obj->Recent}");
+		//echo("<br />Nmsgs = {$imap_obj->Nmsgs}");
 		return $imap_obj->Nmsgs;
 	}
 	function GetAttach($mid,$path) // Get Atteced File from Mail
@@ -172,6 +173,7 @@ class receiveMail
 			foreach($struckture->parts as $key => $value)
 			{
 				$enc=$struckture->parts[$key]->encoding;
+				var_dump($struckture->parts[$key]);
 				if($struckture->parts[$key]->ifdparameters)
 				{
 					$name=$struckture->parts[$key]->dparameters[0]->value;
@@ -190,9 +192,11 @@ class receiveMail
 						$message = $message;
 					$fp=fopen($path.$name,"w");
 					fwrite($fp,$message);
+									
 					fclose($fp);
 					$ar=$ar.$name.",";
 				}
+
 				// Support for embedded attachments starts here
 				if($struckture->parts[$key]->parts)
 				{
@@ -218,6 +222,7 @@ class receiveMail
 								   $message = $message;
 							$fp=fopen($path.$name,"w");
 							fwrite($fp,$message);
+							echo('1'.$fp.$message);
 							fclose($fp);
 							$ar=$ar.$name.",";
 						}
