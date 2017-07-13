@@ -28,7 +28,7 @@ class receiveMail
 	
 	var $email='';			
 	
-	function receiveMail($username,$password,$EmailAddress,$mailserver='localhost',$servertype='pop',$port='110',$ssl = false) //Constructure
+	function __construct($username,$password,$EmailAddress,$mailserver='localhost',$servertype='pop',$port='110',$ssl = false) //Constructure
 	{
 		if($servertype=='imap')
 		{
@@ -44,6 +44,16 @@ class receiveMail
 		$this->password			=	$password;
 		$this->email			=	$EmailAddress;
 	}
+
+	/**
+	 * backward compatibility
+	 * see https://cweiske.de/tagebuch/php4-constructors-php7.htm
+	 */
+	function receiveMail($username,$password,$EmailAddress,$mailserver='localhost',$servertype='pop',$port='110',$ssl = false)
+	{
+		self::__construct($username,$password,$EmailAddress,$mailserver,$servertype,$port,$ssl);
+	}
+
 	function connect() //Connect To the Mail Box
 	{
 		//$this->close_mailbox();
